@@ -1,6 +1,9 @@
 " .vimrc
 set encoding=utf-8
-set t_Co=256
+
+if &term == "screen"
+  set t_Co=256
+endif
 
 " load up pathogen and all bundles
 call pathogen#infect()
@@ -39,9 +42,8 @@ set statusline=%F%m%r%h%w\ %{fugitive#statusline()}\ [%l,%c]\ [%L,%p%%]
 set background=dark
 colorscheme vimbrant
 set colorcolumn=80
-autocmd FileType cs set colorcolumn&
 highlight ColorColumn ctermbg=7
-highlight ColorColumn guibg=Gray
+highlight ColorColumn ctermbg=248 ctermfg=232 guibg=LightGray
 
 highlight clear SignColumn
 highlight VertSplit    ctermbg=236
@@ -63,47 +65,8 @@ if version >= 700
   au InsertLeave * hi StatusLine ctermbg=250 ctermfg=8
 endif
 
-
-" Omnisharp stuff
-
-let g:OmniSharp_host = "http://localhost:2000"
-" preview one item
-set completeopt=longest,menuone,preview
-" Preview window to the bottom of the screen
-set splitbelow
-let g:syntastic_cs_checkers=['syntax', 'semantic', 'issues']
-
-augroup omnisharp_commands
-    autocmd!
-
-    "Set autocomplete function to OmniSharp (if not using YouCompleteMe
-    "completion plugin)
-    autocmd FileType cs setlocal omnifunc=OmniSharp#Complete
-    autocmd FileType cs nnoremap <leader>b :wa!<cr>:OmniSharpBuildAsync<cr>
-    autocmd BufEnter,TextChanged,InsertLeave *.cs SyntasticCheck
-    autocmd BufWritePost *.cs call OmniSharp#AddToProject()
-    autocmd CursorHold *.cs call OmniSharp#TypeLookupWithoutDocumentation()
-    autocmd FileType cs nnoremap gd :OmniSharpGotoDefinition<cr>
-    autocmd FileType cs nnoremap <leader>fi :OmniSharpFindImplementations<cr>
-    autocmd FileType cs nnoremap <leader>ft :OmniSharpFindType<cr>
-    autocmd FileType cs nnoremap <leader>fs :OmniSharpFindSymbol<cr>
-    autocmd FileType cs nnoremap <leader>fu :OmniSharpFindUsages<cr>
-    autocmd FileType cs nnoremap <leader>fm :OmniSharpFindMembers<cr>
-
-    autocmd FileType cs nnoremap <leader>x  :OmniSharpFixIssue<cr>
-    autocmd FileType cs nnoremap <leader>fx :OmniSharpFixUsings<cr>
-    autocmd FileType cs nnoremap <leader>tt :OmniSharpTypeLookup<cr>
-    autocmd FileType cs nnoremap <leader>dc :OmniSharpDocumentation<cr>
-    autocmd FileType cs nnoremap <C-K> :OmniSharpNavigateUp<cr>
-    autocmd FileType cs nnoremap <C-J> :OmniSharpNavigateDown<cr>
-augroup END
-
 set updatetime=500
 set cmdheight=2
 
-nnoremap <leader>nm :OmniSharpRename<cr>
-nnoremap <leader>rl :OmniSharpReloadSolution<cr>
-nnoremap <leader>cf :OmniSharpCodeFormat<cr>
-nnoremap <leader>tp :OmniSharpAddToProject<cr>
 set hidden
 set runtimepath^=~/.vim/bundle/ctrlp.vim

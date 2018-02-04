@@ -1,0 +1,16 @@
+#cloud-config
+users:
+  - name: quantumplation
+    groups: sudo
+    shell: /bin/zsh
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    ssh-authorized-keys:
+      - ecdsa-sha2-nistp384 AAAAE2VjZHNhLXNoYTItbmlzdHAzODQAAAAIbmlzdHAzODQAAABhBNuZeecpmC4PONhgGpkggrtmEk6+hhd8H9koS8Y0fnNYE7JLsuH4SLKsSMmdyzGMa8dZCGIdbvxBKXTmO+nl70c4aHfqmyQoo0bXxi/ZpkE0g9M91aySvX/xdjBEwjeFgQ== ECDSA Kovalevskaya
+packages:
+  - zsh
+runcmd:
+  - echo "Installing ohmyzsh..."
+  - sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+  - echo "Setting up dotfiles..."
+  - git clone https://github.com/Quantumplation/Dotfiles.git /home/quantumplation/Dotfiles
+  - /home/quantumplation/Dotfiles/install.sh
