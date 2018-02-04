@@ -10,7 +10,7 @@ packages:
   - zsh
 runcmd:
   - echo "Installing ohmyzsh..."
-  - sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+  - runuser -l quantumplation -c 'sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"'
   - echo "Setting up dotfiles..."
-  - git clone https://github.com/Quantumplation/Dotfiles.git /home/quantumplation/Dotfiles
-  - /home/quantumplation/Dotfiles/install.sh
+  - runuser -l quantumplation -c 'git clone --recursive https://github.com/Quantumplation/Dotfiles.git /home/quantumplation/Dotfiles'
+  - runuser -l quantumplation -c '/home/quantumplation/Dotfiles/install.sh'
