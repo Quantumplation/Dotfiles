@@ -1,0 +1,9 @@
+[submodule "CtrlP.vim"]
+  path = vim/bundle/ctrlp.vim
+  url = https://github.com/kien/ctrlp.vim.git
+[submodule "Syntastic"]
+  path = vim/bundle/syntastic
+  url = https://github.com/vim-syntastic/syntastic
+[submodule "Fugitive"]
+  path = vim/bundle/vim-fugitive
+  url = https://github.com/tpope/vim-fugitive
