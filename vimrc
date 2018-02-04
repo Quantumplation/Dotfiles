@@ -11,13 +11,15 @@ call pathogen#helptags()
 
 syntax on                         " show syntax highlighting
 filetype plugin indent on
+set smartindent                   " Smart indentation based on code
 set autoindent                    " set auto indent
 set ts=2                          " set indent to 2 spaces
 set shiftwidth=2
 set expandtab                     " use spaces, not tab characters
 set nocompatible                  " don't need to be compatible with old vim
 set relativenumber                " show relative line numbers
-set noshowmatch                     " show bracket matches
+set mouse=a                       " Mouse support (makes line numbers work better)
+set noshowmatch                   " show bracket matches
 set ignorecase                    " ignore case in search
 set hlsearch                      " highlight all search matches
 set cursorline                    " highlight current line
