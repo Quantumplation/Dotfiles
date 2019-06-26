@@ -1,96 +1,237 @@
-" .vimrc
-set encoding=utf-8
+"""""""""""""""""""""""""""""""
+""""" Very General Boilerplate
+"""""""""""""""""""""""""""""""
+set shell=/bin/bash "" Fish doesn't work well in vim, apparently
 
-if &term == "screen"
+set vb t_vb=        "" No beeping
+set shortmess+=c    "" Don't give |ins-completion-menu| messages
+set nocompatible    "" Don't try to be compatible with very old vim
+
+" Use space for leader
+let mapleader = "\<Space>"
+" Quick editing and reloading of this file
+nnoremap <Leader>ve :e $MYVIMRC<CR>
+nnoremap <Leader>vr :source $MYVIMRC<CR>
+
+"""""""""""""""""""""""""""""""
+""""" Plugins
+"""""""""""""""""""""""""""""""
+
+" Install plugged if it's not installed yet
+if has("nvim") && empty(glob('~/.local/share/nvim/site/autoload/plug.vim'))
+    silent !curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs
+        \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+elseif empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
+call plug#begin()
+
+" General purpose
+Plug 'airblade/vim-rooter'                       "" cd to git root
+Plug 'junegunn/fzf',                             "" fuzzy file finder
+  \ { 'dir': '~/.fzf', 'do': './install --all' }
+Plug 'junegunn/fzf.vim'
+let g:fzf_layout = { 'down': '~20%' }
+
+" GUI Enhancements
+Plug 'itchyny/lightline.vim'                     "" Bottom bar
+let g:lightline = { 'colorscheme': 'one', }
+
+Plug 'machakann/vim-highlightedyank'             "" Highlight yanked text
+Plug 'godlygeek/tabular'                         "" Line things up with tabs
+Plug 'chriskempson/base16-vim'                   "" Base16 color schemes
+Plug 'felixhummel/setcolors.vim'                 "" Quick switch of color schemes
+
+" Extra motions
+Plug 'justinmk/vim-sneak'                        "" 2-character motion
+let g:sneak#s_next = 1                           "" s to continue cyling a sneak search
+Plug 'andymass/vim-matchup'                      "" Better % with language-specific features
+
+" Language services
+Plug 'w0rp/ale'                                  "" Like Syntastic, language services
+" Setup hotkeys
+" Ctrl-k  previous error
+" Ctrl-j  next error
+" Shift-L check for errors
+" Ctrl-L  give detailed information about error
+nmap <silent> <C-k> <Plug>(ale_previous_wrap)
+nmap <silent> <C-j> <Plug>(ale_next_wrap)
+nmap <silent> L <Plug>(ale_lint)
+nmap <silent> <C-l> <Plug>(ale_detail)
+
+" ncm2 stuff
+Plug 'ncm2/ncm2'                                 "" Autocompletion
+Plug 'roxma/nvim-yarp'                           "" Remote Plugin framework used by ncm2
+Plug 'ncm2/ncm2-bufword'                         "" Adds words from the current buffer to ncm2
+Plug 'ncm2/ncm2-tmux'                            "" Adds words from other tmux panes to ncm2
+Plug 'ncm2/ncm2-path'                            "" Adds file paths to ncm2
+
+" Settings for ncm2
+autocmd BufEnter * call ncm2#enable_for_buffer() "" Enable ncm2 on all buffers
+set completeopt=noinsert,menuone,noselect        "" Required completeopt for ncm2
+" tab to select
+" and don't hijack my enter key
+inoremap <expr><Tab> (pumvisible()?(empty(v:completed_item)?"\<C-n>":"\<C-y>"):"\<Tab>")
+inoremap <expr><CR> (pumvisible()?(empty(v:completed_item)?"\<CR>\<CR>":"\<C-y>"):"\<CR>")
+
+" Filetype language support
+"  Configuration files
+Plug 'cespare/vim-toml'        "" toml language support
+Plug 'plasticboy/vim-markdown' "" markdown support (Note: must be after tabular)
+"  Programming Languages
+Plug 'rust-lang/rust.vim'      "" Official rust language support
+"  Shell files
+Plug 'dag/vim-fish'            "" Fish scripting language support
+
+call plug#end()
+
+
+"""""""""""""""""""""""""""""""
+""""" Other Settings
+"""""""""""""""""""""""""""""""
+
+" General Settings
+set hidden                                                    "" Keep things open in a hidden buffer
+set nowrap                                                    "" Don't visually wrap lines
+set nojoinspaces                                              "" Don't insert double spaces, it's outdated
+
+" Colors
+syntax on
+if !has('gui_running')
   set t_Co=256
 endif
 
-" load up pathogen and all bundles
-call pathogen#infect()
-call pathogen#helptags()
-
-syntax on                         " show syntax highlighting
-filetype plugin indent on
-set smartindent                   " Smart indentation based on code
-set autoindent                    " set auto indent
-set ts=2                          " set indent to 2 spaces
-set shiftwidth=2
-set expandtab                     " use spaces, not tab characters
-set nocompatible                  " don't need to be compatible with old vim
-set relativenumber                " show relative line numbers
-set mouse=a                       " Mouse support (makes line numbers work better)
-set noshowmatch                   " show bracket matches
-set ignorecase                    " ignore case in search
-set hlsearch                      " highlight all search matches
-set cursorline                    " highlight current line
-set smartcase                     " pay attention to case when caps are used
-set incsearch                     " show search results as I type
-set ttimeoutlen=100               " decrease timeout for faster insert with 'O'
-set vb                            " enable visual bell (disable audio bell)
-set ruler                         " show row and column in footer
-set scrolloff=2                   " minimum lines above/below cursor
-set laststatus=2                  " always show status bar
-set list listchars=tab:»·,trail:· " show extra space characters
-set nofoldenable                  " disable code folding
-set clipboard=unnamed             " use the system clipboard
-set wildmenu                      " enable bash style tab completion
-set wildmode=list:longest,full
-set backspace=indent,eol,start
-runtime macros/matchit.vim        " use % to jump between start/end of methods
-
-" put status, column/row number, total lines, and percentage in status
-set statusline=%F%m%r%h%w\ %{fugitive#statusline()}\ [%l,%c]\ [%L,%p%%]
-
-set background=dark
-colorscheme vimbrant
-set colorcolumn=80
+" Window layout
+set guioptions-=T                                             "" Remove toolbar
+set noshowmode                                                "" Don't show the mode, since we have lightline
+set ruler                                                     "" Line/column numbers in footer
+set laststatus=2                                              "" Always render the status line
+set showcmd                                                   "" Render the partial command in the status line
+set relativenumber                                            "" Relative line numbers
+set number                                                    "" Show the current line as absolute
+set colorcolumn=80                                            "" and give me a colored column
 highlight ColorColumn ctermbg=7
 highlight ColorColumn ctermbg=248 ctermfg=232 guibg=LightGray
+set signcolumn=yes                                            "" Always show the debugger/error gutter
+set splitright                                                "" Split a new pane to the right (default is left)
+set splitbelow                                                "" Split a new pane to the bottom (default is top)
+set expandtab                                                 "" Use spaces, not tabs
+set tabstop=2                                                 "" Tab based indentation indents by 2 characters
 
-highlight clear SignColumn
-highlight VertSplit    ctermbg=236
-highlight LineNr       ctermbg=236 ctermfg=240
-highlight CursorLineNr ctermbg=236 ctermfg=240
-highlight CursorLine   ctermbg=236
-highlight StatusLineNC ctermbg=238 ctermfg=0
-highlight StatusLine   ctermbg=250 ctermfg=8
-highlight IncSearch    ctermbg=3   ctermfg=1
-highlight Search       ctermbg=1   ctermfg=3
-highlight Visual       ctermbg=3   ctermfg=0
-highlight Pmenu        ctermbg=240 ctermfg=12
-highlight PmenuSel     ctermbg=3   ctermfg=1
-highlight SpellBad     ctermbg=0   ctermfg=1
+" The wildmenu is what appears for autocompletions
+" Turn it on, then set the mode
+"  - On first tab, show the list and autocomplete
+set wildmenu
+set wildmode=longest:list,full
+set wildignore=.hg,.svn,*~,*.png,*.jpg,*.gif,*.settings,Thumbs.db,*.min.js,*.swp,publish/*,intermediate/*,*.o,*.hi,Zend,vendor
 
+" Editing
+set timeoutlen=400                                "" Vim has weird normal-mode delay because key chords
+set ttimeoutlen=100
+set backspace=2                                   "" Backspace over newlines
+set foldmethod=marker                             "" Fold only on marks
+set mouse=a                                       "" Always enable the mouse
+set nolist                                        "" Render whitespace
+set listchars=nbsp:¬,extends:»,precedes:«,trail:•
+set encoding=utf-8                                "" utf-8 encoding
+set scrolloff=5                                   "" Keep 5 lines above or below the cursor when possible
+set undodir=~/.vimdid                             "" This and the next line enable infinite/permanent undo
+set undofile
+set clipboard=unnamed                             "" Use the system clipboard
+set shiftwidth=2                                  "" Indent by two spaces (NOTE: should always be the same as tabstop
 
-let g:SuperTabDefaultCompletionType = '<c-x><c-o>'
-map <Leader>n :NERDTreeToggle<CR>
+if has('wsl')
+  " On WSL, keep system clipboard updated
+  augroup Yank
+    autocmd!
+    autocmd TextYankPost * :call system('clip.exe ',@")
+  augroup END
 
-if has("gui_running")
-    imap <c-space> <c-r>=SuperTabAlternateCompletion("\<lt>c-x>\<lt>c-o>")<cr>
-else " no gui
-  if has("unix")
-    inoremap <Nul> <c-r>=SuperTabAlternateCompletion("\<lt>c-x>\<lt>c-o>")<cr>
-  endif
+  " And make the visual cursor work with WSL
+  " NOTE: Doesn't actually work...
+  " https://github.com/Maximus5/ConEmu/issues/937#issuecomment-421426600
+  let &t_SI.="\e[5 q"
+  let &t_SR.="\e[4 q"
+  let &t_EI.="\e[1 q"
 endif
 
-let g:haskellmode_completion_ghc = 1
-autocmd FileType haskell setlocal omnifunc=necoghc#omnifunc
+" Better diffing
+" https://vimways.org/2018/the-power-of-diff/
+set diffopt+=iwhite                             "" No whitespace in vimdiff
+set diffopt+=algorithm:patience                 "" The "patience" diff algorithm
+set diffopt+=indent-heuristic                   "" Try to ignore indentation changes
 
-let g:syntastic_haskell_checkers=['']
-autocmd BufWritePost *.hs GhcModCheckAndLintAsync
-map <silent> tw :GhcModTypeInsert<CR>
-map <silent> ts :GhcModSplitFunCase<CR>
-map <silent> tq :GhcModType<CR>
-map <silent> te :GhcModTypeClear<CR>
+" Searching
+set incsearch                                   "" Show search results incrementally
+set ignorecase                                  "" Ignore case when searching,
+set smartcase                                   "" However, if we include capital letters, be case sensitive
+set gdefault                                    "" make substitutions search globally by default
 
-" highlight the status bar when in insert mode
-if version >= 700
-  au InsertEnter * hi StatusLine ctermbg=238 ctermfg=2
-  au InsertLeave * hi StatusLine ctermbg=250 ctermfg=8
-endif
+" Fix a redraw issue with relative line numbers
+set ttyfast
+set lazyredraw
+set regexpengine=1
+set synmaxcol=500
 
-set updatetime=500
-set cmdheight=2
+                                                "" neovim specific settings
+if has("nvim")
+  " Change the cursor in different modes
+  " n-v-c:                                      "" In normal, visual, and command-line normal (append) modes
+  " block-Cursor/lCursor-blinkon0,              "" Use an unblinking block cursor using the Cursor colors
+  " i-ci:                                       "" In insert and Command-line insert modes
+  " ver24-Cursor/lcursor                        "" Use a blinking 24% width cursor using the cursor colors
+  " r-cr:                                       "" In replace and rommand-line replace mode
+  " hor20-Cursor/lcursor                        "" Use a blinking 20% height cursor using the cursor colors
+  set guicursor=n-v-c:block-Cursor/lCursor-blinkon0,i-ci:ver25-Cursor/lCursor,r-cr:hor20-Cursor/lCursor
+  set inccommand=nosplit
+  noremap <C-q> :confirm qall<CR>
+end
 
-set hidden
-set runtimepath^=~/.vim/bundle/ctrlp.vim
+"""""""""""""""""""""""""""""""
+""""" Keyboard Shortcuts
+"""""""""""""""""""""""""""""""
+
+" Swap between most recent buffers
+nnoremap <Leader><Leader> <c-^>
+" Quick save
+nmap <Leader>w :w<CR>
+" Quick buffer
+nmap <Leader>s :Buffers<CR>
+" Quick open
+nmap <Leader>o :Files<CR>
+
+" easier commands
+nnoremap ; :
+" Easier beginning and end of line 
+map H ^
+map L $
+
+" Center things by applying zz after various keypresses
+" The <silent> suppresses nzz from being displayed at the bottom
+" n - next search result
+" N - previous search result
+" * - search for the word under the current cursor
+" # - search backwards for the word under the current cursor
+" g* - search for the word under the current cursor (even inside other words)
+nnoremap <silent> n nzz
+nnoremap <silent> N Nzz
+nnoremap <silent> * *zz
+nnoremap <silent> # #zz
+nnoremap <silent> g* g*zz
+" Use escape to clear the search buffer
+nnoremap <silent> <esc> :noh<return><esc>
+
+" Turn on "very magic" mode by default, which means regexes prefer special
+" characters, and must be escaped for normal characters
+nnoremap ? ?\v
+nnoremap / /\v
+cnoremap %s/ %sm/
+
+" Move by visual line, instead of physical line, for word wrapping
+nnoremap j gj
+nnoremap k gk
+
